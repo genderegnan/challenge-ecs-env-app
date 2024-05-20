@@ -1,0 +1,23 @@
+{
+  "name": "challenge-ecs-env-app",
+  "version": "1.0.0",
+  "description": "Challenge for the N5 company",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/genderegnan/challenge-ecs-env-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/genderegnan/challenge-ecs-env-app/issues"
+  },
+  "homepage": "https://github.com/genderegnan/challenge-ecs-env-app#readme",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
