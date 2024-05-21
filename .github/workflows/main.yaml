@@ -35,7 +35,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         IMAGE_URL: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
-        ENVIRONMENT_NAME: ${{ github.ref_name == 'develop' && 'Develop' || 'Testing' }}
+        ENVIRONMENT_NAME: ${{ github.ref_name == 'develop' && 'Develop' || 'testing' && 'Testing' }}
       run: |
         cd terraform
         terraform init
