@@ -18,7 +18,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.ASSUME_ROLE }}
-          aws-region: us-west-2
+          aws-region: ${{ secrets.AWS_REGION }}
 
       # Añade tus otros pasos aquí
 
