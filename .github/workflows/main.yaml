@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Configure AWS credentials from assume role
-        uses: aws-actions/configure-aws-credentials@v4
+      - uses: actions/checkout@v3
         with:
-          role-to-assume: ${{ secrets.ASSUME_ROLE }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          fetch-depth: 0  
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: testing
+          aws-region: ${{ secrets.AWS_REGION }}
 
       # Añade tus otros pasos aquí
 
