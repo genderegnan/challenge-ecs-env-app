@@ -1,24 +1,27 @@
-name: Deploy to ECS
+name: Deploy to AWS
 
-on:
-  push:
-    branches:
-      - develop
-      - testing
+on: [push]
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
-      with:
-        role-to-assume: ${{ secrets.ASSUME_ROLE }}
-        aws-region: ${{ secrets.AWS_REGION }}
+      - name: Configure AWS credentials from assume role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ASSUME_ROLE }}
+          aws-region: us-west-2
+
+      # Añade tus otros pasos aquí
+
 
 #    - name: Login to Amazon ECR Public
 #      id: login-ecr-public
