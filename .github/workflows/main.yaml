@@ -14,14 +14,14 @@ jobs:
   S3PackageUpload:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
+      - uses: actions/checkout@v3
         with:
-          role-to-assume: arn:aws:iam::618755546955:role/Assume_Role_V2
-          aws-region: aws-region-1
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysi
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: "${{ github.event.repository.name }}"
+          aws-region: ${{ secrets.AWS_REGION }}
 
 
 #    - name: Build, tag, and push docker image to Amazon ECR Public
