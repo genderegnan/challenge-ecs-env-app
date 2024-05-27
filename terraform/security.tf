@@ -1,12 +1,15 @@
-# ALB security group
-resource "aws_security_group" "load_balancer_sg" {
-  name   = "${var.name_prefix}-alb-sg"
-  vpc_id = "${aws_vpc.main_network.id}"
+# security.tf
+
+# ALB Security Group: Edit to restrict access to the application
+resource "aws_security_group" "lb" {
+  name        = "cb-load-balancer-security-group"
+  description = "controls access to the ALB"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     protocol    = "tcp"
-    from_port   = 80
-    to_port     = 80
+    from_port   = var.app_port
+    to_port     = var.app_port
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -18,16 +21,17 @@ resource "aws_security_group" "load_balancer_sg" {
   }
 }
 
-# ECS tasks security group
-resource "aws_security_group" "ecs_tasks_sg" {
-  name   = "${var.name_prefix}-ecs-tasks-sg"
-  vpc_id = "${aws_vpc.main_network.id}"
+# Traffic to the ECS cluster should only come from the ALB
+resource "aws_security_group" "ecs_tasks" {
+  name        = "cb-ecs-tasks-security-group"
+  description = "allow inbound access from the ALB only"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     protocol        = "tcp"
-    from_port       = 80
-    to_port         = 80
-    security_groups = ["${aws_security_group.load_balancer_sg.id}"]
+    from_port       = var.app_port
+    to_port         = var.app_port
+    security_groups = [aws_security_group.lb.id]
   }
 
   egress {

@@ -1,4 +1,9 @@
-# AWS configuration
+
+# provider.tf
+
+# Specify the provider and access details
 provider "aws" {
-  region = "us-east-1"
+  shared_credentials_file = "$HOME/.aws/credentials"
+  profile                 = "default"
+  region                  = us-east-1
 }
