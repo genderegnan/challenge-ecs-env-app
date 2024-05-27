@@ -2,10 +2,10 @@
 # The workflow Creates static website using aws s3
 name: AWS example workflow
 on:
-  push
-env:
-  BUCKET_NAME : "test"
-  AWS_REGION : "us-east-1"
+  push:
+    branches:
+      - testing
+
 # permission can be added at job level or workflow level
 permissions:
   id-token: write   # This is required for requesting the JWT
@@ -24,7 +24,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
-          role-to-assume: ${{ secrets.SECRETS_AWS_PACKAGING_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 900
           role-session-name: SecretsManagerFetch
 
