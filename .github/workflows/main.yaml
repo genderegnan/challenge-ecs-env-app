@@ -77,14 +77,12 @@ jobs:
     #    docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     
-    #- name: Deploy to ECS
-    #  env:
-    #    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #    AWS_REGION: ${{ secrets.AWS_REGION }}
-    #    IMAGE_URL: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
-    #    ENVIRONMENT_NAME: ${{ github.ref_name == 'develop' && 'Develop' || 'testing' && 'Testing' }}
-    #  run: |
-    #    cd terraform
-    #    terraform init
-    #    terraform apply -auto-approve -var "image_url=$IMAGE_URL" -var "environment_name=$ENVIRONMENT_NAME"
+      - name: Deploy to ECS
+        env:
+         AWS_REGION: ${{ secrets.AWS_REGION }}
+         IMAGE_URL: ${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:latest
+         ENVIRONMENT_NAME: ${{ github.ref_name }}
+        run: |
+         cd terraform
+         terraform init
+         terraform apply -auto-approve -var "image_url=$IMAGE_URL" -var "environment_name=$ENVIRONMENT_NAME"
