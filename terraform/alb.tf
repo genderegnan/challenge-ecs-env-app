@@ -1,35 +1,38 @@
-# define ALB
-resource "aws_alb" "alb" {
-  name            = "${var.name_prefix}-alb"
-  subnets         = ["${aws_subnet.public_subnet.*.id}"]
-  security_groups = ["${aws_security_group.load_balancer_sg.id}"]
+
+# alb.tf
+
+resource "aws_alb" "main" {
+  name            = "cb-load-balancer"
+  subnets         = aws_subnet.public.*.id
+  security_groups = [aws_security_group.lb.id]
 }
 
-resource "aws_alb_target_group" "alb_target_group" {
-  name        = "${var.name_prefix}-alb-target-group"
-  port        = "${var.container_port}"
-  protocol    = "${var.alb_protocol}"
-  vpc_id      = "${aws_vpc.main_network.id}"
+resource "aws_alb_target_group" "app" {
+  name        = "cb-target-group"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
   target_type = "ip"
 
   health_check {
     healthy_threshold   = "3"
-    unhealthy_threshold = "3"
-    timeout             = "3"
-    interval            = "5"
-    protocol            = "${var.alb_protocol}"
+    interval            = "30"
+    protocol            = "HTTP"
     matcher             = "200"
-    path                = "${var.healthcheck_path}"
+    timeout             = "3"
+    path                = var.health_check_path
+    unhealthy_threshold = "2"
   }
 }
 
-resource "aws_alb_listener" "load_balancer_listener" {
-  load_balancer_arn = "${aws_alb.alb.id}"
-  port              = "${var.container_port}"
-  protocol          = "${var.alb_protocol}"
+# Redirect all traffic from the ALB to the target group
+resource "aws_alb_listener" "front_end" {
+  load_balancer_arn = aws_alb.main.id
+  port              = var.app_port
+  protocol          = "HTTP"
 
   default_action {
-    target_group_arn = "${aws_alb_target_group.alb_target_group.id}"
+    target_group_arn = aws_alb_target_group.app.id
     type             = "forward"
   }
 }

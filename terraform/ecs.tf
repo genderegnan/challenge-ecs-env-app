@@ -5,7 +5,7 @@ resource "aws_ecs_cluster" "main" {
 }
 
 data "template_file" "cb_app" {
-  template = file("./templates/ecs/cb_app.json.tpl")
+  #template = file("./templates/ecs/cb_app.json.tpl")
 
   vars = {
     app_image      = var.app_image
@@ -23,7 +23,25 @@ resource "aws_ecs_task_definition" "app" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.fargate_cpu
   memory                   = var.fargate_memory
-  container_definitions    = data.template_file.cb_app.rendered
+  container_definitions = jsonencode([
+    {
+      name      = "ecs-app"
+      image     = var.app_image
+      essential = true
+      portMappings = [
+        {
+          containerPort = 3000
+          hostPort      = 3000
+        }
+      ]
+      environment = [
+        {
+          name  = "ENVIRONMENT_NAME"
+          value = var.environment_name
+        }
+      ]
+    }
+  ])
 }
 
 resource "aws_ecs_service" "main" {
@@ -44,6 +62,7 @@ resource "aws_ecs_service" "main" {
     container_name   = "cb-app"
     container_port   = var.app_port
   }
+  
 
   depends_on = [aws_alb_listener.front_end, aws_iam_role_policy_attachment.ecs_task_execution_role]
 }

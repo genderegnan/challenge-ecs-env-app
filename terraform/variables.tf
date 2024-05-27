@@ -1,55 +1,56 @@
-variable "name_prefix" {
-  default = "dev-tranque"
-}
+
+# variables.tf
 
 variable "aws_region" {
-  default = "us-east-q"
+  description = "The AWS region things are created in"
+  default     = "us-west-2"
+}
+
+variable "ecs_task_execution_role_name" {
+  description = "ECS task execution role name"
+  default = "myEcsTaskExecutionRole"
+}
+
+variable "ecs_auto_scale_role_name" {
+  description = "ECS auto scale role Name"
+  default = "myEcsAutoScaleRole"
 }
 
 variable "az_count" {
-  default = "2"
+  description = "Number of AZs to cover in a given region"
+  default     = "2"
 }
 
-variable "healthcheck_path" {
+variable "app_image" {
+  description = "Docker image to run in the ECS cluster"
+  default     = "bradfordhamilton/crystal_blockchain:latest"
+}
+
+variable "app_port" {
+  description = "Port exposed by the docker image to redirect traffic to"
+  default     = 3000
+}
+
+variable "app_count" {
+  description = "Number of docker containers to run"
+  default     = 3
+}
+
+variable "health_check_path" {
   default = "/"
 }
 
 variable "fargate_cpu" {
-  default = "1024"
+  description = "Fargate instance CPU units to provision (1 vCPU = 1024 CPU units)"
+  default     = "1024"
 }
 
 variable "fargate_memory" {
-  default = "2048"
+  description = "Fargate instance memory to provision (in MiB)"
+  default     = "2048"
 }
 
-variable "ecs_task_execution_role" {
-  default = "arn:aws:iam::719699785587:role/ecsTaskExecutionRole"
-}
-
-variable "ecs_autoscale_role" {
-  default = "arn:aws:iam::719699785587:role/ecsAutoscaleRole"
-}
-
-variable "min_capacity" {
-  default = "2"
-}
-
-variable "max_capacity" {
-  default = "5"
-}
-
-variable "container_port" {
-  default = "80"
-}
-
-variable "alb_protocol" {
-  default = "HTTP"
-}
-
-variable "balanced_container_name" {
-  default = "tranque-api"
-}
-
-variable "app_image" {
-  default = "618755546955.dkr.ecr.us-east-1.amazonaws.com/challenge-ecs-env-app:latest"
+variable "environment_name" {
+  description = "The name of the environment (Develop or Testing)"
+  type        = string
 }
