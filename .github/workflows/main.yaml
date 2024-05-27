@@ -1,42 +1,58 @@
-name: Deploy to ECS
-
+# Sample workflow to access AWS resources when workflow is tied to branch
+# The workflow Creates static website using aws s3
+name: AWS example workflow
 on:
   push:
     branches:
-      - develop
       - testing
 
+# permission can be added at job level or workflow level
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
 jobs:
-  deploy:
+  S3PackageUpload:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysi
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: "${{ github.event.repository.name }}"
+          aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
 
-    - name: Log in to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v1
+#    - name: Build, tag, and push docker image to Amazon ECR Public
+#      env:
+#        REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
+#        REGISTRY_ALIAS: my-ecr-public-registry-alias
+#        REPOSITORY: my-ecr-public-repo
+#        IMAGE_TAG: ${{ github.sha }}
+#     run: |
+#        docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
+#        docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG    
 
-    - name: Build and push Docker image
-      env:
-        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-    - name: Deploy to ECS
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-        IMAGE_URL: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
-        ENVIRONMENT_NAME: ${{ github.ref_name == 'develop' && 'Develop' || 'Testing' }}
-      run: |
-        cd terraform
-        terraform init
-        terraform apply -auto-approve -var "image_url=$IMAGE_URL" -var "environment_name=$ENVIRONMENT_NAME"
+    #- name: Build and push Docker image
+    #  env:
+    #    ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+    #    ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+    #    IMAGE_TAG: ${{ github.sha }}
+    #  run: |
+    #    docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+    #    docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    
+    #- name: Deploy to ECS
+    #  env:
+    #    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #    AWS_REGION: ${{ secrets.AWS_REGION }}
+    #    IMAGE_URL: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+    #    ENVIRONMENT_NAME: ${{ github.ref_name == 'develop' && 'Develop' || 'testing' && 'Testing' }}
+    #  run: |
+    #    cd terraform
+    #    terraform init
+    #    terraform apply -auto-approve -var "image_url=$IMAGE_URL" -var "environment_name=$ENVIRONMENT_NAME"
