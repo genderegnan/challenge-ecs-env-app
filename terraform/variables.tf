@@ -3,7 +3,7 @@ variable "name_prefix" {
 }
 
 variable "aws_region" {
-  default = "us-west-2"
+  default = "us-east-q"
 }
 
 variable "az_count" {
@@ -51,4 +51,5 @@ variable "balanced_container_name" {
 }
 
 variable "app_image" {
-  defau
+  default = "618755546955.dkr.ecr.us-east-1.amazonaws.com/challenge-ecs-env-app:latest"
+}
