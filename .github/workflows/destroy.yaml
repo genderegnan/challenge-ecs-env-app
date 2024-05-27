@@ -1,0 +1,42 @@
+name: Destroy AWS Resources
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "yes" to confirm destruction of resources'
+        required: true
+        default: 'no'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  Destroy:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'yes'
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: "${{ github.event.repository.name }}"
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to AWS ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Destroy Terraform-managed infrastructure
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ENVIRONMENT_NAME: ${{ github.ref_name }}
+        run: |
+          cd terraform
+          terraform init
+          terraform destroy -auto-approve -var "environment_name=$ENVIRONMENT_NAME"
