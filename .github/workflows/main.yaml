@@ -50,6 +50,4 @@ jobs:
         run: |
          cd terraform
          terraform init
-         terraform apply -auto-approve 
-         
-#-var "environment_name=$ENVIRONMENT_NAME"
+         terraform apply -auto-approve -var "image_url=$IMAGE_URL" -var "environment_name=$ENVIRONMENT_NAME"
