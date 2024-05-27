@@ -28,10 +28,9 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Create Registry Repo BO (if not exists)
-        run: aws ecr create-repository --repository-name $REPOSITORY || true
+        run: aws ecr create-repository --repository-name ${{ secrets.REPOSITORY }} || true
         env:
-            REGISTRY: ${{ secrets.ECR_REGISTRY }}
-            REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+            REGISTRY: ${{ secrets.REGISTRY }}
             IMAGE_TAG: ${{ github.sha }}
         #run: |
         #  docker build -t $REPOSITORY:$IMAGE_TAG .
