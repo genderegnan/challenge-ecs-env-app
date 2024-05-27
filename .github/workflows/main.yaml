@@ -1,22 +1,20 @@
-# Sample workflow to access AWS resources when workflow is tied to branch
-# The workflow Creates static website using aws s3
 name: AWS example workflow
 on:
   push:
     branches:
       - testing
+      - develop
 
-# permission can be added at job level or workflow level
 permissions:
-  id-token: write   # This is required for requesting the JWT
-  contents: read    # This is required for actions/checkout
+  id-token: write 
+  contents: read    
 jobs:
   Callenge:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysi
+          fetch-depth: 0 
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
@@ -37,45 +35,12 @@ jobs:
           push: true
           tags: ${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:latest
 
-
-      #- name: Build, tag, and push docker image to Amazon ECR Public  
-      #  env:
-      #    REPOSITORY: ${{ secrets.REPOSITORY }}
-      #    REGISTRY: ${{ secrets.REGISTRY }}
-      #    IMAGE_TAG: ${{ github.sha }}    
-      #  run: |
-      #    docker build -t $REPOSITORY:$IMAGE_TAG  .
-          #docker build -t $REPOSITORY/$REGISTRY:$IMAGE_TAG .
-      #    docker push $REPOSITORY:$IMAGE_TAG 
-
-
       - name: Build & Push Release Image
         uses: docker/build-push-action@v3
         with:
           no-cache: true
           push: true
           tags: ${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:latest
-
-#      - name: Build, tag, and push docker image to Amazon ECR Public
-#        env:
-#          REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
-#          REGISTRY_ALIAS: my-ecr-public-registry-alias
-#          REPOSITORY: my-ecr-public-repo
-#          IMAGE_TAG: ${{ github.sha }}
-#        run: |
-#          docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
-#          docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG    
-
-
-    #- name: Build and push Docker image
-    #  env:
-    #    ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-    #    ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-    #    IMAGE_TAG: ${{ github.sha }}
-    #  run: |
-    #    docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-    #    docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
     
       - name: Deploy to ECS
         env:
