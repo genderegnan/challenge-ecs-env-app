@@ -28,7 +28,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Create Registry Repo BO (if not exists)
-        run: aws ecr create-repository --repository-name {{ github.event.repository.name }} || true
+        run: aws ecr create-repository --repository-name ${{ github.event.repository.name }} || true
 
       - name: Build & Push Release Image
         uses: docker/build-push-action@v3
