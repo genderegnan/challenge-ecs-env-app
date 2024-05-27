@@ -38,7 +38,7 @@ jobs:
         run: |
           docker build -t $REPOSITORY .
           #docker build -t $REPOSITORY/$REGISTRY:$IMAGE_TAG .
-          docker push $REPOSITORY/:$IMAGE_TAG 
+          docker push $REPOSITORY:$IMAGE_TAG 
 
 #      - name: Build, tag, and push docker image to Amazon ECR Public
 #        env:
