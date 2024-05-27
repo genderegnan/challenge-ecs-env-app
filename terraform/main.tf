@@ -2,18 +2,18 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_vpc" "example" {
+resource "aws_vpc" "ecs" {
   cidr_block = "10.0.0.0/16"
 }
 
-resource "aws_subnet" "example" {
-  vpc_id     = aws_vpc.example.id
+resource "aws_subnet" "ecs" {
+  vpc_id     = aws_vpc.ecs.id
   cidr_block = "10.0.1.0/24"
 }
 
-resource "aws_security_group" "example" {
-  vpc_id      = aws_vpc.example.id
-  name        = "example-sg"
+resource "aws_security_group" "ecs" {
+  vpc_id      = aws_vpc.ecs.id
+  name        = "ecs-sg"
   description = "Allow HTTP traffic"
 
   
@@ -33,12 +33,12 @@ resource "aws_security_group" "example" {
   }
 }
 
-resource "aws_ecs_cluster" "example" {
-  name = "example-cluster"
+resource "aws_ecs_cluster" "ecs" {
+  name = "ecs-cluster"
 }
 
-resource "aws_ecs_task_definition" "example" {
-  family                   = "example-task"
+resource "aws_ecs_task_definition" "ecs" {
+  family                   = "ecs-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -48,7 +48,7 @@ resource "aws_ecs_task_definition" "example" {
 
   container_definitions = jsonencode([
     {
-      name      = "example-app"
+      name      = "ecs-app"
       image     = var.image_url
       essential = true
       portMappings = [
@@ -67,15 +67,15 @@ resource "aws_ecs_task_definition" "example" {
   ])
 }
 
-resource "aws_ecs_service" "example" {
-  name            = "example-service"
-  cluster         = aws_ecs_cluster.example.id
-  task_definition = aws_ecs_task_definition.example.arn
+resource "aws_ecs_service" "ecs" {
+  name            = "ecs-service"
+  cluster         = aws_ecs_cluster.ecs.id
+  task_definition = aws_ecs_task_definition.ecs.arn
   desired_count   = 1
   launch_type     = "FARGATE"
   network_configuration {
-    subnets = [aws_subnet.example.id]
-    security_groups = [aws_security_group.example.id]
+    subnets = [aws_subnet.ecs.id]
+    security_groups = [aws_security_group.ecs.id]
   }
 }
 
