@@ -1,8 +1,4 @@
-output "ecs_cluster_name" {
-  value = aws_ecs_cluster.ecs.name
+# get ALB DNS name
+output "alb_hostname" {
+  value = "${aws_alb.alb.dns_name}"
 }
-
-output "ecs_service_name" {
-  value = aws_ecs_service.ecs.name
-}
-
