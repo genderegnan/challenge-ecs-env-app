@@ -1,8 +1,8 @@
 output "ecs_cluster_name" {
-  value = aws_ecs_cluster.example.name
+  value = aws_ecs_cluster.ecs.name
 }
 
 output "ecs_service_name" {
-  value = aws_ecs_service.example.name
+  value = aws_ecs_service.ecs.name
 }
 
