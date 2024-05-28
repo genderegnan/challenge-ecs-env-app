@@ -1,27 +1,20 @@
-name: Destroy AWS Resources
-
+name: AWS example workflow
 on:
-  workflow_dispatch:
-    inputs:
-      confirm:
-        description: 'Type "yes" to confirm destruction of resources'
-        required: true
-        default: 'no'
+  push:
+    branches:
+      - testing
+      - develop
 
 permissions:
-  id-token: write
-  contents: read
-
+  id-token: write 
+  contents: read    
 jobs:
-  Destroy:
+  Callenge:
     runs-on: ubuntu-latest
-    if: github.event.inputs.confirm == 'yes'
-
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 
-
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
