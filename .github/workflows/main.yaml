@@ -1,59 +1,53 @@
-name: Deploy to ECS
-
+name: AWS example workflow
 on:
   push:
     branches:
-      - develop
       - testing
+      - develop
 
+permissions:
+  id-token: write 
+  contents: read    
 jobs:
-  deploy:
+  Callenge:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: "${{ github.event.repository.name }}"
+          aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
-      with:
-        role-to-assume: ${{ secrets.ASSUME_ROLE }}
-        aws-region: ${{ secrets.AWS_REGION }}
+      - name: Login to AWS ECR BO
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Login to Amazon ECR Public
-      id: login-ecr-public
-      uses: aws-actions/amazon-ecr-login@v2
-      with:
-        registry-type: public
-    - name: Build, tag, and push docker image to Amazon ECR Public
-      env:
-        REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
-        REGISTRY_ALIAS: my-ecr-public-registry-alias
-        REPOSITORY: my-ecr-public-repo
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
-        docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG    
+      - name: Create Registry Repo BO (if not exists)
+        run: aws ecr create-repository --repository-name ${{ github.event.repository.name }} || true
 
+      - name: Build & Push Release Image
+        uses: docker/build-push-action@v3
+        with:
+          no-cache: true
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:latest
 
-    #- name: Build and push Docker image
-    #  env:
-    #    ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-    #    ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-    #    IMAGE_TAG: ${{ github.sha }}
-    #  run: |
-    #    docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-    #    docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
+      - name: Build & Push Release Image
+        uses: docker/build-push-action@v3
+        with:
+          no-cache: true
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:latest
     
-    - name: Deploy to ECS
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-        IMAGE_URL: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
-        ENVIRONMENT_NAME: ${{ github.ref_name == 'develop' && 'Develop' || 'testing' && 'Testing' }}
-      run: |
-        cd terraform
-        terraform init
-        terraform apply -auto-approve -var "image_url=$IMAGE_URL" -var "environment_name=$ENVIRONMENT_NAME"
+      - name: Deploy to ECS
+        env:
+         AWS_REGION: ${{ secrets.AWS_REGION }}
+         IMAGE_URL: ${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:latest
+         ENVIRONMENT_NAME: ${{ github.ref_name }}
+        run: |
+         cd terraform
+         terraform init
+         terraform apply -auto-approve -var "environment_name=$ENVIRONMENT_NAME"
