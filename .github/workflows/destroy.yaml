@@ -24,7 +24,19 @@ jobs:
       - name: Login to AWS ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-
+  
+      - name: Verify Terraform State
+        run: |
+          cd terraform
+          terraform init
+          terraform show
+  
+      - name: Sync Terraform State
+        run: |
+          cd terraform
+          # Import resources if necessary
+          # terraform import aws_instance.example i-1234567890abcdef0
+  
       - name: Destroy Terraform-managed infrastructure
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
